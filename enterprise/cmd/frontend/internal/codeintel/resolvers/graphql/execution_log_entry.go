@@ -27,11 +27,12 @@ func newExecutionLogEntryResolver(entry *workerutil.ExecutionLogEntry) *executio
 }
 
 func (r *executionLogEntryResolver) Key() string {
-	if r == nil {
-		// TODO
-		log15.Warn("THIS SHOULDN'T BE HAPPENING!!!!!")
-		return ""
-	}
+	// Hurr durr I'm erlang just let it crash
+	// if r == nil {
+	// 	// TODO
+	// 	log15.Warn("THIS SHOULDN'T BE HAPPENING!!!!!")
+	// 	return ""
+	// }
 
 	return r.entry.Key
 }

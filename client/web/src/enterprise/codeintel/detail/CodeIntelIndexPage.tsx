@@ -184,7 +184,7 @@ const ExecutionSteps: FunctionComponent<ExecutionStepsProps> = ({ index }) => (
             ))}
 
             {index.steps.preIndex.map(step => (
-                <li key={`${step.image}::${step.root}::${step.commands.join(' ')}`} className="list-group-item">
+                <li key={`${step.}::${step.root}::${step.commands.join(' ')}`} className="list-group-item">
                     <code>
                         <strong>{step.image}</strong> {step.commands.join(' ')}
                     </code>
