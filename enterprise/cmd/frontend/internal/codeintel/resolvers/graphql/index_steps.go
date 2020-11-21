@@ -22,38 +22,44 @@ func (r *indexStepsResolver) Setup() []gql.ExecutionLogEntryResolver {
 func (r *indexStepsResolver) PreIndex() []gql.PreIndexStepResolver {
 	var resolvers []gql.PreIndexStepResolver
 	for i, step := range r.index.DockerSteps {
-		resolvers = append(resolvers, &preIndexStepResolver{
-			step:  step,
-			entry: r.findExecutionLogEntry(fmt.Sprintf("step.docker.%d", i)),
-		})
+		if entry, ok := r.findExecutionLogEntry(fmt.Sprintf("step.docker.%d", i)); ok {
+			resolvers = append(resolvers, &preIndexStepResolver{step: step, entry: &entry})
+		} else {
+			resolvers = append(resolvers, &preIndexStepResolver{step: step, entry: nil})
+		}
 	}
 
 	return resolvers
 }
 
 func (r *indexStepsResolver) Index() gql.IndexStepResolver {
-	return &indexStepResolver{
-		index: r.index,
-		entry: r.findExecutionLogEntry(fmt.Sprintf("step.docker.%d", len(r.index.DockerSteps)-1)),
+	if entry, ok := r.findExecutionLogEntry(fmt.Sprintf("step.docker.%d", len(r.index.DockerSteps))); ok {
+		return &indexStepResolver{index: r.index, entry: &entry}
 	}
+
+	return &indexStepResolver{index: r.index, entry: nil}
 }
 
 func (r *indexStepsResolver) Upload() gql.ExecutionLogEntryResolver {
-	return newExecutionLogEntryResolver(r.findExecutionLogEntry("step.src.0"))
+	if entry, ok := r.findExecutionLogEntry("step.src.0"); ok {
+		return &executionLogEntryResolver{entry: entry}
+	}
+
+	return nil
 }
 
 func (r *indexStepsResolver) Teardown() []gql.ExecutionLogEntryResolver {
 	return r.executionLogEntryResolversWithPrefix("teardown.")
 }
 
-func (r *indexStepsResolver) findExecutionLogEntry(key string) *workerutil.ExecutionLogEntry {
+func (r *indexStepsResolver) findExecutionLogEntry(key string) (workerutil.ExecutionLogEntry, bool) {
 	for _, entry := range r.index.ExecutionLogs {
 		if entry.Key == key {
-			return &entry
+			return entry, true
 		}
 	}
 
-	return nil
+	return workerutil.ExecutionLogEntry{}, false
 }
 
 func (r *indexStepsResolver) executionLogEntryResolversWithPrefix(prefix string) []gql.ExecutionLogEntryResolver {
