@@ -52,9 +52,9 @@ func (h *handler) prepareWorkspace(ctx context.Context, commandRunner command.Ru
 	}
 
 	gitCommands := []command.CommandSpec{
-		{Key: "git.init", Commands: []string{"git", "-C", tempDir, "init"}},
-		{Key: "git.fetch", Commands: []string{"git", "-C", tempDir, "-c", "protocol.version=2", "fetch", cloneURL.String(), commit}},
-		{Key: "git.checkout", Commands: []string{"git", "-C", tempDir, "checkout", commit}},
+		{Key: "setup.git.init", Commands: []string{"git", "-C", tempDir, "init"}},
+		{Key: "setup.git.fetch", Commands: []string{"git", "-C", tempDir, "-c", "protocol.version=2", "fetch", cloneURL.String(), commit}},
+		{Key: "setup.git.checkout", Commands: []string{"git", "-C", tempDir, "checkout", commit}},
 	}
 	for _, spec := range gitCommands {
 		if err := commandRunner.Run(ctx, spec); err != nil {

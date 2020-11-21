@@ -7865,6 +7865,16 @@ type LSIFIndex implements Node {
     inputCommit: String!
 
     """
+    The original root supplied at index schedule time.
+    """
+    inputRoot: String!
+
+    """
+    The name of the target indexer Docker image (e.g., sourcegraph/lsif-go@sha256:...).
+    """
+    inputIndexer: String!
+
+    """
     The index's current state.
     """
     state: LSIFIndexState!
@@ -7890,34 +7900,9 @@ type LSIFIndex implements Node {
     failure: String
 
     """
-    A series of pre-indexing steps to perform.
+    TODO
     """
-    dockerSteps: [DockerStep!]!
-
-    """
-    The original root supplied at index schedule time.
-    """
-    inputRoot: String!
-
-    """
-    The name of the target indexer Docker image (e.g., sourcegraph/lsif-go@sha256:...).
-    """
-    indexer: String!
-
-    """
-    The arguments to supply to the indexer container.
-    """
-    indexerArgs: [String!]!
-
-    """
-    The path to the index file relative to the root directory (dump.lsif by default).
-    """
-    outfile: String
-
-    """
-    The description of a command run inside the executor to during processing of this index.
-    """
-    executionLogs: [ExecutionLogEntry!]!
+    steps: IndexSteps!
 
     """
     The rank of this index in the queue. The value of this field is null if the index has been processed.
@@ -7926,9 +7911,40 @@ type LSIFIndex implements Node {
 }
 
 """
+TODO
+"""
+type IndexSteps {
+    """
+    TODO
+    """
+    setup: [ExecutionLogEntry!]!
+
+    """
+    TODO
+    """
+    preIndex: [PreIndexStep!]!
+
+    """
+    TODO
+    """
+    index: IndexStep!
+
+    """
+    TODO
+    """
+    upload: ExecutionLogEntry
+
+    """
+    TODO
+    """
+    teardown: [ExecutionLogEntry!]!
+}
+
+"""
+TODO
 A description of a command to run inside of a Docker container.
 """
-type DockerStep {
+type PreIndexStep {
     """
     The working directory relative to the cloned repository root.
     """
@@ -7943,10 +7959,35 @@ type DockerStep {
     The arguments to supply to the Docker container's entrypoint.
     """
     commands: [String!]!
+
+    """
+    TODO
+    """
+    logEntry: ExecutionLogEntry
 }
 
 """
-A description of a command run inside the executor to during processing of the parent record..
+TODO
+"""
+type IndexStep {
+    """
+    The arguments to supply to the indexer container.
+    """
+    indexerArgs: [String!]!
+
+    """
+    The path to the index file relative to the root directory (dump.lsif by default).
+    """
+    outfile: String
+
+    """
+    TODO
+    """
+    logEntry: ExecutionLogEntry
+}
+
+"""
+A description of a command run inside the executor to during processing of the parent record.
 """
 type ExecutionLogEntry {
     """
@@ -7977,7 +8018,7 @@ type ExecutionLogEntry {
     """
     TODO
     """
-    duration: Duration!
+    durationMilliseconds: Int!
 }
 
 """

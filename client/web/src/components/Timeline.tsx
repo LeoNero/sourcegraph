@@ -29,7 +29,7 @@ export const Timeline: FunctionComponent<TimelineProps> = ({ stages, now, classN
 
                 return (
                     stage.date && (
-                        <>
+                        <div key={stage.date}>
                             {previousDate && (
                                 <div className="d-flex align-items-center">
                                     <div className="flex-0">
@@ -53,7 +53,7 @@ export const Timeline: FunctionComponent<TimelineProps> = ({ stages, now, classN
                                     {stage.text} <Timestamp date={stage.date} now={now} noAbout={true} />
                                 </div>
                             </div>
-                        </>
+                        </div>
                     )
                 )
             })}

@@ -15,7 +15,7 @@ import {
     LsifUploadsResult,
     LsifUploadsVariables,
 } from '../../../graphql-operations'
-import { lsifIndexFieldsFragment, lsifUploadFieldsFragment } from '../shared/backend'
+import { indexStepsFieldsFragment, lsifIndexFieldsFragment, lsifUploadFieldsFragment } from '../shared/backend'
 
 interface UploadConnection {
     nodes: LsifUploadFields[]
@@ -178,6 +178,7 @@ export function fetchLsifIndexes({
             }
 
             ${lsifIndexFieldsFragment}
+            ${indexStepsFieldsFragment}
         `
 
         return requestGraphQL<LsifIndexesForRepoResult, LsifIndexesForRepoVariables>(gqlQuery, {
@@ -213,6 +214,7 @@ export function fetchLsifIndexes({
         }
 
         ${lsifIndexFieldsFragment}
+        ${indexStepsFieldsFragment}
     `
 
     return requestGraphQL<LsifIndexesResult, LsifIndexesVariables>(gqlQuery, vars).pipe(

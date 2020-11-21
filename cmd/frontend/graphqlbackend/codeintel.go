@@ -129,25 +129,37 @@ type LSIFRepositoryIndexesQueryArgs struct {
 type LSIFIndexResolver interface {
 	ID() graphql.ID
 	InputCommit() string
+	InputRoot() string
+	InputIndexer() string
 	QueuedAt() DateTime
 	State() string
 	Failure() *string
 	StartedAt() *DateTime
 	FinishedAt() *DateTime
-	DockerSteps() []DockerStepResolver
-	InputRoot() string
-	Indexer() string
-	IndexerArgs() []string
-	Outfile() *string
-	ExecutionLogs(ctx context.Context) ([]ExecutionLogEntryResolver, error)
+	Steps() IndexStepsResolver
 	PlaceInQueue() *int32
 	ProjectRoot(ctx context.Context) (*GitTreeEntryResolver, error)
 }
 
-type DockerStepResolver interface {
+type IndexStepsResolver interface {
+	Setup() []ExecutionLogEntryResolver
+	PreIndex() []PreIndexStepResolver
+	Index() IndexStepResolver
+	Upload() ExecutionLogEntryResolver
+	Teardown() []ExecutionLogEntryResolver
+}
+
+type PreIndexStepResolver interface {
 	Root() string
 	Image() string
 	Commands() []string
+	LogEntry() ExecutionLogEntryResolver
+}
+
+type IndexStepResolver interface {
+	IndexerArgs() []string
+	Outfile() *string
+	LogEntry() ExecutionLogEntryResolver
 }
 
 type ExecutionLogEntryResolver interface {
@@ -155,7 +167,7 @@ type ExecutionLogEntryResolver interface {
 	Command() []string
 	StartTime() DateTime
 	ExitCode() int32
-	Out() string
+	Out(ctx context.Context) (string, error)
 	DurationMilliseconds() int32
 }
 

@@ -84,7 +84,7 @@ func setupFirecracker(ctx context.Context, runner commandRunner, logger *Logger,
 		}
 
 		pullCommand := command{
-			Key:      fmt.Sprintf("firecracker.setup.docker.pull.%s", key),
+			Key:      fmt.Sprintf("setup.docker.pull.%s", key),
 			Commands: flatten("docker", "pull", imageMap[key]),
 		}
 		if err := runner.RunCommand(ctx, logger, pullCommand); err != nil {
@@ -92,7 +92,7 @@ func setupFirecracker(ctx context.Context, runner commandRunner, logger *Logger,
 		}
 
 		saveCommand := command{
-			Key:      fmt.Sprintf("firecracker.setup.docker.save.%s", key),
+			Key:      fmt.Sprintf("setup.docker.save.%s", key),
 			Commands: flatten("docker", "save", "-o", tarfilePathOnHost(key, options), imageMap[key]),
 		}
 		if err := runner.RunCommand(ctx, logger, saveCommand); err != nil {
@@ -102,7 +102,7 @@ func setupFirecracker(ctx context.Context, runner commandRunner, logger *Logger,
 
 	// Start the VM and wait for the SSH serer to become available
 	startCommand := command{
-		Key: "firecracker.setup.start",
+		Key: "setup.start",
 		Commands: flatten(
 			"ignite", "run",
 			commonFirecrackerFlags,
@@ -120,7 +120,7 @@ func setupFirecracker(ctx context.Context, runner commandRunner, logger *Logger,
 	// Load images from tar files
 	for _, key := range imageKeys {
 		loadCommand := command{
-			Key:      fmt.Sprintf("firecracker.setup.docker.load.%s", key),
+			Key:      fmt.Sprintf("setup.docker.load.%s", key),
 			Commands: flatten("ignite", "exec", name, "--", "docker", "load", "-i", tarfilePathInVM(key)),
 		}
 		if err := runner.RunCommand(ctx, logger, loadCommand); err != nil {
@@ -131,7 +131,7 @@ func setupFirecracker(ctx context.Context, runner commandRunner, logger *Logger,
 	// Remove tar files to give more working space
 	for _, key := range imageKeys {
 		rmCommand := command{
-			Key: fmt.Sprintf("firecracker.setup.rm.%s", key),
+			Key: fmt.Sprintf("setup.rm.%s", key),
 			Commands: flatten(
 				"ignite", "exec", name, "--",
 				"rm", tarfilePathInVM(key),
@@ -149,7 +149,7 @@ func setupFirecracker(ctx context.Context, runner commandRunner, logger *Logger,
 // the given name.
 func teardownFirecracker(ctx context.Context, runner commandRunner, logger *Logger, name string) error {
 	stopCommand := command{
-		Key:      "firecracker.teardown.stop",
+		Key:      "teardown.firecracker.stop",
 		Commands: flatten("ignite", "stop", commonFirecrackerFlags, name),
 	}
 	if err := runner.RunCommand(ctx, logger, stopCommand); err != nil {
@@ -157,7 +157,7 @@ func teardownFirecracker(ctx context.Context, runner commandRunner, logger *Logg
 	}
 
 	removeCommand := command{
-		Key:      "firecracker.teardown.remove",
+		Key:      "teardown.firecracker.remove",
 		Commands: flatten("ignite", "rm", "-f", commonFirecrackerFlags, name),
 	}
 	if err := runner.RunCommand(ctx, logger, removeCommand); err != nil {

@@ -10,6 +10,8 @@ import (
 	"github.com/sourcegraph/sourcegraph/internal/api"
 )
 
+// TODO - unexport these
+
 type UploadResolver struct {
 	upload           store.Upload
 	locationResolver *CachedLocationResolver
