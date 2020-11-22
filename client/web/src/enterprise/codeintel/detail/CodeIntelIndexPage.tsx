@@ -14,7 +14,7 @@ import { ErrorAlert } from '../../../components/alerts'
 import { PageTitle } from '../../../components/PageTitle'
 import { LsifIndexFields } from '../../../graphql-operations'
 import { CodeIntelStateBanner } from '../shared/CodeIntelStateBanner'
-import { CodeIntelUploadOrIndexTimeline } from '../shared/CodeIntelUploadOrIndexTimeline'
+import { CodeIntelIndexTimeline } from './CodeIntelIndexTimeline'
 import { deleteLsifIndex, fetchLsifIndex as defaultFetchLsifIndex } from './backend'
 import { CodeIntelIndexMeta } from './CodeIntelIndexMeta'
 
@@ -114,8 +114,7 @@ export const CodeIntelIndexPage: FunctionComponent<CodeIntelIndexPageProps> = ({
                             <CodeIntelIndexMeta node={indexOrError} now={now} />
                         </div>
                     </div>
-                    <CodeIntelUploadOrIndexTimeline node={indexOrError} now={now} className="mb-3" />
-                    <ExecutionSteps index={indexOrError} />
+                    <CodeIntelIndexTimeline index={indexOrError} now={now} className="mb-3" />
                 </>
             )}
         </div>
@@ -162,88 +161,4 @@ const CodeIntelDeleteIndex: FunctionComponent<CodeIntelDeleteIndexProps> = ({ de
     >
         <DeleteIcon className="icon-inline" /> Delete index
     </button>
-)
-
-//
-//
-//
-
-interface ExecutionStepsProps {
-    index: LsifIndexFields
-}
-
-const ExecutionSteps: FunctionComponent<ExecutionStepsProps> = ({ index }) => (
-    <>
-        <h3>Execution</h3>
-
-        <ul className="list-group">
-            {index.steps.setup.map(logEntry => (
-                <li key={logEntry.key} className="list-group-item">
-                    <ExecThinger logEntry={logEntry} />
-                </li>
-            ))}
-
-            {index.steps.preIndex.map(step => (
-                <li key={`${step.image}::${step.root}::${step.commands.join(' ')}`} className="list-group-item">
-                    <code>
-                        <strong>{step.image}</strong> {step.commands.join(' ')}
-                    </code>
-                    <span className="float-right">
-                        <span className="text-muted">executed in</span> /{step.root}
-                    </span>
-
-                    {step.logEntry && <ExecThinger logEntry={step.logEntry} />}
-                </li>
-            ))}
-
-            <li className="list-group-item">
-                <code>
-                    <strong>{index.inputIndexer}</strong> {index.steps.index.indexerArgs.join(' ')}
-                </code>
-                <span className="float-right">
-                    <span className="text-muted">executed in</span> /{index.inputRoot}
-                </span>
-
-                {index.steps.index.logEntry && <ExecThinger logEntry={index.steps.index.logEntry} />}
-            </li>
-
-            {index.steps.upload && (
-                <li className="list-group-item">
-                    <ExecThinger logEntry={index.steps.upload} />
-                </li>
-            )}
-
-            {index.steps.teardown.map(logEntry => (
-                <li key={logEntry.key} className="list-group-item">
-                    <ExecThinger logEntry={logEntry} />
-                </li>
-            ))}
-        </ul>
-    </>
-)
-
-interface ExecThingerProps {
-    logEntry: {
-        key: string
-        command: string[]
-        startTime: string
-        exitCode: number
-        out: string
-        durationMilliseconds: number
-    }
-}
-
-const ExecThinger: FunctionComponent<ExecThingerProps> = ({ logEntry }) => (
-    <>
-        <p>
-            Started at {logEntry.startTime}, ran for {logEntry.durationMilliseconds} (
-            {logEntry.exitCode === 0 ? 'success' : 'failure'})
-        </p>
-        <pre className="bg-code rounded p-3">
-            <code dangerouslySetInnerHTML={{ __html: logEntry.command.join(' ') }} />
-        </pre>
-        <pre className="bg-code rounded p-3">
-            <code dangerouslySetInnerHTML={{ __html: logEntry.out }} />
-        </pre>
-    </>
 )

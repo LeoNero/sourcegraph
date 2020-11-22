@@ -15,7 +15,7 @@ import { ErrorAlert } from '../../../components/alerts'
 import { PageTitle } from '../../../components/PageTitle'
 import { LsifUploadFields } from '../../../graphql-operations'
 import { CodeIntelStateBanner } from '../shared/CodeIntelStateBanner'
-import { CodeIntelUploadOrIndexTimeline } from '../shared/CodeIntelUploadOrIndexTimeline'
+import { CodeIntelUploadTimeline } from './CodeIntelUploadTimeline'
 import { deleteLsifUpload, fetchLsifUpload as defaultFetchUpload } from './backend'
 import { CodeIntelUploadMeta } from './CodeIntelUploadMeta'
 
@@ -129,7 +129,7 @@ export const CodeIntelUploadPage: FunctionComponent<CodeIntelUploadPageProps> = 
                             <CodeIntelUploadMeta node={uploadOrError} now={now} />
                         </div>
                     </div>
-                    <CodeIntelUploadOrIndexTimeline node={uploadOrError} className="mb-3" />
+                    <CodeIntelUploadTimeline upload={uploadOrError} className="mb-3" />
                 </>
             )}
         </div>
