@@ -230,7 +230,8 @@ const LogOutput: FunctionComponent<LogOutputProps> = ({ text, className }) => (
         <code>
             {text
                 .split('\n')
-                .map(line => line) // line.replace(/^std(out|err): /, ''))
+                // .map(line => line.replace(/^std(out|err): /, ''))
+                .map(line => line)
                 .join('\n')}
         </code>
     </pre>
