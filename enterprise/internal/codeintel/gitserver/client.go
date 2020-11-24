@@ -70,7 +70,6 @@ func (c *Client) CommitGraph(ctx context.Context, repositoryID int, opts CommitG
 		log.Int("repositoryID", repositoryID),
 		log.String("commit", opts.Commit),
 		log.Int("limit", opts.Limit),
-		log.String("since", opts.Since.String()),
 	}})
 	defer endObservation(1, observation.Args{})
 
