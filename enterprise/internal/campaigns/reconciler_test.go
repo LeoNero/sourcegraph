@@ -835,7 +835,7 @@ func TestDeterminePlan(t *testing.T) {
 	}
 
 	campaignSpec := createCampaignSpec(t, ctx, store, "test-plan", admin.ID)
-	createCampaign(t, ctx, store, "test-plan", admin.ID, campaignSpec.ID)
+	campaign := createCampaign(t, ctx, store, "test-plan", admin.ID, campaignSpec.ID)
 
 	tcs := []struct {
 		name           string
@@ -960,6 +960,44 @@ func TestDeterminePlan(t *testing.T) {
 				repo:             githubRepo.ID,
 			},
 			wantOperations: operations{operationPush, operationSleep, operationSync},
+		},
+		{
+			name: "changeset merged and spec changed is noop",
+			previousSpec: testSpecOpts{
+				published:  true,
+				repo:       githubRepo.ID,
+				commitDiff: "testDiff",
+			},
+			currentSpec: testSpecOpts{
+				published:  true,
+				repo:       githubRepo.ID,
+				commitDiff: "newTestDiff",
+			},
+			changeset: testChangesetOpts{
+				publicationState: campaigns.ChangesetPublicationStatePublished,
+				externalState:    campaigns.ChangesetExternalStateMerged,
+				repo:             githubRepo.ID,
+			},
+			wantOperations: operations{},
+		},
+		{
+			name: "changeset closed and detached will reopen",
+			previousSpec: testSpecOpts{
+				published: true,
+				repo:      githubRepo.ID,
+			},
+			currentSpec: testSpecOpts{
+				published: true,
+				repo:      githubRepo.ID,
+			},
+			changeset: testChangesetOpts{
+				publicationState: campaigns.ChangesetPublicationStatePublished,
+				externalState:    campaigns.ChangesetExternalStateClosed,
+				repo:             githubRepo.ID,
+				ownedByCampaign:  campaign.ID,
+				campaignIDs:      []int64{campaign.ID},
+			},
+			wantOperations: operations{operationReopen},
 		},
 	}
 
@@ -1121,6 +1159,7 @@ type testChangesetOpts struct {
 	campaign     int64
 	currentSpec  int64
 	previousSpec int64
+	campaignIDs  []int64
 
 	externalServiceType string
 	externalID          string
@@ -1155,6 +1194,7 @@ func createChangeset(
 		RepoID:         opts.repo,
 		CurrentSpecID:  opts.currentSpec,
 		PreviousSpecID: opts.previousSpec,
+		CampaignIDs:    opts.campaignIDs,
 
 		ExternalServiceType: opts.externalServiceType,
 		ExternalID:          opts.externalID,
