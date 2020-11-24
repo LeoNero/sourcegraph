@@ -226,10 +226,13 @@ func (e *ChangesetEvent) Timestamp() time.Time {
 		t = ev.CreatedAt.Time
 	case *gitlab.UnmarkWorkInProgressEvent:
 		t = ev.CreatedAt.Time
-	case *gitlabwebhooks.MergeRequestCloseEvent,
-		*gitlabwebhooks.MergeRequestMergeEvent,
-		*gitlabwebhooks.MergeRequestReopenEvent,
-		*gitlabwebhooks.PipelineEvent:
+	case *gitlab.MergeRequestClosedEvent:
+		t = ev.CreatedAt.Time
+	case *gitlab.MergeRequestReopenedEvent:
+		t = ev.CreatedAt.Time
+	case *gitlab.MergeRequestMergedEvent:
+		t = ev.CreatedAt.Time
+	case *gitlabwebhooks.PipelineEvent:
 		// These events do not inherently have timestamps from GitLab, so we
 		// fall back to the event record we created when we received the
 		// webhook.
@@ -635,18 +638,18 @@ func (e *ChangesetEvent) Update(o *ChangesetEvent) error {
 		// We always get the full event, so safe to replace it
 		*e = *o
 
-	case *gitlabwebhooks.MergeRequestCloseEvent:
-		o := o.Metadata.(*gitlabwebhooks.MergeRequestCloseEvent)
+	case *gitlab.MergeRequestClosedEvent:
+		o := o.Metadata.(*gitlab.MergeRequestClosedEvent)
 		// We always get the full event, so safe to replace it
 		*e = *o
 
-	case *gitlabwebhooks.MergeRequestMergeEvent:
-		o := o.Metadata.(*gitlabwebhooks.MergeRequestMergeEvent)
+	case *gitlab.MergeRequestReopenedEvent:
+		o := o.Metadata.(*gitlab.MergeRequestReopenedEvent)
 		// We always get the full event, so safe to replace it
 		*e = *o
 
-	case *gitlabwebhooks.MergeRequestReopenEvent:
-		o := o.Metadata.(*gitlabwebhooks.MergeRequestReopenEvent)
+	case *gitlab.MergeRequestMergedEvent:
+		o := o.Metadata.(*gitlab.MergeRequestMergedEvent)
 		// We always get the full event, so safe to replace it
 		*e = *o
 

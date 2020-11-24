@@ -1,9 +1,6 @@
 package webhooks
 
 import (
-	"fmt"
-	"time"
-
 	"github.com/pkg/errors"
 	"github.com/sourcegraph/sourcegraph/internal/extsvc/gitlab"
 )
@@ -67,22 +64,6 @@ func (e *MergeRequestUnapprovedEvent) ToEvent() *MergeRequestEventCommon {
 }
 func (e *MergeRequestUpdateEvent) ToEvent() *MergeRequestEventCommon {
 	return &e.MergeRequestEventCommon
-}
-
-// We don't define Key() methods on MergeRequestApprovedEvent and
-// MergeRequestUnapprovedEvent because we don't need them when handling
-// webhooks: those events don't include enough information (specifically, the
-// system note ID) for us to create changeset events from them, so those types
-// don't need to implement keyer.
-
-func (e *MergeRequestCloseEvent) Key() string  { return e.key("Close") }
-func (e *MergeRequestMergeEvent) Key() string  { return e.key("Merge") }
-func (e *MergeRequestReopenEvent) Key() string { return e.key("Reopen") }
-
-func (e *MergeRequestEventCommon) key(prefix string) string {
-	// We can't key solely off the merge request ID because it may be reopened
-	// and closed multiple times. Instead, we'll use the UpdatedAt field.
-	return fmt.Sprintf("MergeRequest:%s:%d:%s", prefix, e.MergeRequest.IID, e.MergeRequest.UpdatedAt.Format(time.RFC3339))
 }
 
 // mergeRequestEvent is an internal type used for initially unmarshalling the

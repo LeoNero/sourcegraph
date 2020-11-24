@@ -67,23 +67,42 @@ type Note struct {
 	System    bool           `json:"system"`
 }
 
-func (n *Note) Key() string {
-	return fmt.Sprintf("Note:%d", n.ID)
-}
-
 // Notes are not strongly typed, but also provide the only real method we have
 // of getting historical approval events. We'll define a couple of fake types to
 // better match what other external services provide, and a function to convert
 // a Note into one of those types if the Note is a system approval comment.
 
 type ReviewApprovedEvent struct{ *Note }
+
+func (e *ReviewApprovedEvent) Key() string {
+	return fmt.Sprintf("approved:%d:%s", e.Author.ID, e.CreatedAt.Time)
+}
+
 type ReviewUnapprovedEvent struct{ *Note }
+
+func (e *ReviewUnapprovedEvent) Key() string {
+	return fmt.Sprintf("unapproved:%d:%s", e.Author.ID, e.CreatedAt.Time)
+}
+
 type MarkWorkInProgressEvent struct{ *Note }
+
+func (e *MarkWorkInProgressEvent) Key() string {
+	return fmt.Sprintf("wip:%s", e.CreatedAt.Time)
+}
+
 type UnmarkWorkInProgressEvent struct{ *Note }
+
+func (e *UnmarkWorkInProgressEvent) Key() string {
+	return fmt.Sprintf("unwip:%s", e.CreatedAt.Time)
+}
+
+type keyer interface {
+	Key() string
+}
 
 // ToEvent returns a pointer to a more specific struct, or
 // nil if the Note is not of a known kind.
-func (n *Note) ToEvent() interface{} {
+func (n *Note) ToEvent() keyer {
 	if n.System {
 		switch n.Body {
 		case SystemNoteBodyReviewApproved:

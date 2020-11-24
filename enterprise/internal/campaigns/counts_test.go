@@ -11,7 +11,6 @@ import (
 	"github.com/sourcegraph/sourcegraph/internal/extsvc/bitbucketserver"
 	"github.com/sourcegraph/sourcegraph/internal/extsvc/github"
 	"github.com/sourcegraph/sourcegraph/internal/extsvc/gitlab"
-	gitlabwebhooks "github.com/sourcegraph/sourcegraph/internal/extsvc/gitlab/webhooks"
 	"github.com/sourcegraph/sourcegraph/internal/timeutil"
 )
 
@@ -1575,10 +1574,8 @@ func glClosed(id int64, t time.Time, login string) *campaigns.ChangesetEvent {
 	return &campaigns.ChangesetEvent{
 		ChangesetID: id,
 		Kind:        campaigns.ChangesetEventKindGitLabClosed,
-		Metadata: &gitlabwebhooks.MergeRequestCloseEvent{
-			MergeRequestEventCommon: gitlabwebhooks.MergeRequestEventCommon{
-				User: &gitlab.User{Username: login},
-			},
+		Metadata: &gitlab.MergeRequestClosedEvent{
+			ResourceStateEvent: &gitlab.ResourceStateEvent{CreatedAt: gitlab.Time{Time: t}, User: gitlab.User{Username: login}},
 		},
 		CreatedAt: t,
 	}

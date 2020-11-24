@@ -50,6 +50,7 @@ type MergeRequest struct {
 	// to do it the old fashioned way with lots of REST requests.
 	Notes     []*Note
 	Pipelines []*Pipeline
+	Events    []*ResourceStateEvent
 }
 
 func SetWIP(title string) string {

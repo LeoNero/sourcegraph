@@ -171,6 +171,9 @@ func (h *GitLabWebhook) handleEvent(ctx context.Context, extSvc *repos.ExternalS
 	// webhook.
 	case *webhooks.MergeRequestApprovedEvent,
 		*webhooks.MergeRequestUnapprovedEvent,
+		*webhooks.MergeRequestCloseEvent,
+		*webhooks.MergeRequestMergeEvent,
+		*webhooks.MergeRequestReopenEvent,
 		*webhooks.MergeRequestUpdateEvent:
 		if err := h.enqueueChangesetSyncFromEvent(ctx, esID, e.(webhooks.MergeRequestEventContainer).ToEvent()); err != nil {
 			return &httpError{
@@ -181,14 +184,14 @@ func (h *GitLabWebhook) handleEvent(ctx context.Context, extSvc *repos.ExternalS
 		return nil
 
 	// All other merge request events are state events.
-	case stateMergeRequestEvent:
-		if err := h.handleMergeRequestStateEvent(ctx, esID, e); err != nil {
-			return &httpError{
-				code: http.StatusInternalServerError,
-				err:  err,
-			}
-		}
-		return nil
+	// case stateMergeRequestEvent:
+	// 	if err := h.handleMergeRequestStateEvent(ctx, esID, e); err != nil {
+	// 		return &httpError{
+	// 			code: http.StatusInternalServerError,
+	// 			err:  err,
+	// 		}
+	// 	}
+	// 	return nil
 
 	case *webhooks.PipelineEvent:
 		if err := h.handlePipelineEvent(ctx, esID, e); err != nil && err != errPipelineMissingMergeRequest {
@@ -228,14 +231,14 @@ func (h *GitLabWebhook) enqueueChangesetSyncFromEvent(ctx context.Context, esID 
 	return nil
 }
 
-func (h *GitLabWebhook) handleMergeRequestStateEvent(ctx context.Context, esID string, event stateMergeRequestEvent) error {
-	e := event.ToEvent()
-	pr := gitlabToPR(&e.Project, e.MergeRequest)
-	if err := h.upsertChangesetEvent(ctx, esID, pr, event); err != nil {
-		return errors.Wrap(err, "upserting changeset event")
-	}
-	return nil
-}
+// func (h *GitLabWebhook) handleMergeRequestStateEvent(ctx context.Context, esID string, event stateMergeRequestEvent) error {
+// 	e := event.ToEvent()
+// 	pr := gitlabToPR(&e.Project, e.MergeRequest)
+// 	if err := h.upsertChangesetEvent(ctx, esID, pr, event); err != nil {
+// 		return errors.Wrap(err, "upserting changeset event")
+// 	}
+// 	return nil
+// }
 
 func (h *GitLabWebhook) handlePipelineEvent(ctx context.Context, esID string, event *webhooks.PipelineEvent) error {
 	// Pipeline webhook payloads don't include the merge request very reliably:
