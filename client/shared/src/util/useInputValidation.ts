@@ -17,7 +17,7 @@ export interface ValidationOptions {
      * If there's no problem with the input, return undefined. Else,
      * return with the reason the input is invalid.
      */
-    synchronousValidators?: ((value: string) => ValidationResult)[]
+    synchronousValidators?: ((value: string, isValid: boolean, validationMessage : string) => ValidationResult)[]
 
     /**
      * Optional array of asynchronous input validators. These must return
@@ -149,18 +149,11 @@ export function createValidationPipeline(
             debounceTime(VALIDATION_DEBOUNCE_TIME),
             switchMap(value => {
                 // check validity (synchronous)
-                const valid = inputReference.current?.checkValidity()
-                if (!valid) {
-                    onValidationUpdate({
-                        value,
-                        kind: 'INVALID',
-                        reason: inputReference.current?.validationMessage ?? '',
-                    })
-                    return of(inputReference.current?.validationMessage ?? '')
-                }
+                const valid = inputReference.current?.checkValidity() ?? false;
+                const validationMessage = inputReference.current?.validationMessage ?? ''
 
                 // check custom sync validators
-                const syncReason = head(compact(synchronousValidators?.map(validator => validator(value))))
+                const syncReason = head(compact(synchronousValidators?.map(validator => validator(value, valid, validationMessage))))
                 if (syncReason) {
                     inputReference.current?.setCustomValidity(syncReason)
                     onValidationUpdate({

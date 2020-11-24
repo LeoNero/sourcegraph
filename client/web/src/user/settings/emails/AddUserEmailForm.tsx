@@ -29,8 +29,15 @@ export const AddUserEmailForm: FunctionComponent<Props> = ({ user, className, on
     const [emailState, nextEmailFieldChange, emailInputReference, overrideEmailState] = useInputValidation(
         useMemo(
             () => ({
-                synchronousValidators: [],
-                asynchronousValidators: [],
+                synchronousValidators: [
+                    (value: string, isValid: boolean) => {
+                        // override browser's email validation message
+                        if (isValid) {
+                            return
+                        }
+                        return 'Please enter a valid email address'
+                    },
+                ],
             }),
             []
         )
