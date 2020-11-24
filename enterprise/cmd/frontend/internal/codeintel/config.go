@@ -17,6 +17,7 @@ type Config struct {
 	HunkCacheSize                 int
 	DataTTL                       time.Duration
 	UploadTimeout                 time.Duration
+	EnableCommitUpdater           bool
 	EnableAutoIndexing            bool
 	IndexBatchSize                int
 	MinimumTimeSinceLastEnqueue   time.Duration
@@ -38,6 +39,7 @@ func init() {
 	config.CommitGraphUpdateTaskInterval = config.GetInterval("PRECISE_CODE_INTEL_COMMIT_GRAPH_UPDATE_TASK_INTERVAL", "10s", "The frequency with which to run periodic codeintel commit graph update tasks.")
 	config.CleanupTaskInterval = config.GetInterval("PRECISE_CODE_INTEL_CLEANUP_TASK_INTERVAL", "1m", "The frequency with which to run periodic codeintel cleanup tasks.")
 	config.AutoIndexingTaskInterval = config.GetInterval("PRECISE_CODE_INTEL_AUTO_INDEXING_TASK_INTERVAL", "10m", "The frequency with which to run periodic codeintel auto-indexing tasks.")
+	config.EnableCommitUpdater = config.GetBool("PRECISE_CODE_INTEL_ENABLE_COMMIT_UPDATER", "true", "Whether to enable periodically updating the commit graph for code intelligence.")
 	config.EnableAutoIndexing = config.GetBool("PRECISE_CODE_INTEL_ENABLE_AUTO_INDEXING", "false", "Whether to enable scheduling of auto-indexing tasks.")
 	config.IndexBatchSize = config.GetInt("PRECISE_CODE_INTEL_INDEX_BATCH_SIZE", "100", "The number of indexable repositories to schedule at a time.")
 	config.MinimumTimeSinceLastEnqueue = config.GetInterval("PRECISE_CODE_INTEL_MINIMUM_TIME_SINCE_LAST_ENQUEUE", "24h", "The minimum time between auto-index enqueues for the same repository.")

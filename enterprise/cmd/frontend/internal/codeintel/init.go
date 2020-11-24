@@ -107,17 +107,19 @@ func newBackgroundRoutines() ([]goroutine.BackgroundRoutine, error) {
 	gitserverClient := services.gitserverClient
 	metrics := background.NewMetrics(observationContext.Registerer)
 
+	// Cleanup routines
 	routines := []goroutine.BackgroundRoutine{
-		// Commit graph updater
-		background.NewCommitUpdater(dbStoreShim, gitserverClient, config.CommitGraphUpdateTaskInterval),
-
-		// Cleanup
 		background.NewAbandonedUploadJanitor(dbStoreShim, config.UploadTimeout, config.CleanupTaskInterval, metrics),
 		background.NewDeletedRepositoryJanitor(dbStoreShim, config.CleanupTaskInterval, metrics),
 		background.NewHardDeleter(dbStoreShim, lsifStoreShim, config.CleanupTaskInterval, metrics),
 		background.NewRecordExpirer(dbStoreShim, config.DataTTL, config.CleanupTaskInterval, metrics),
 		background.NewUploadResetter(dbStoreShim, config.CleanupTaskInterval, metrics),
 		background.NewIndexResetter(dbStoreShim, config.CleanupTaskInterval, metrics),
+	}
+
+	if config.EnableCommitUpdater {
+		// Commit graph updater
+		routines = append(routines, background.NewCommitUpdater(dbStoreShim, gitserverClient, config.CommitGraphUpdateTaskInterval))
 	}
 
 	if config.EnableAutoIndexing {
