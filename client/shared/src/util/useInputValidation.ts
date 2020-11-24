@@ -152,7 +152,9 @@ export function createValidationPipeline(
                 const valid = inputReference.current?.checkValidity() ?? false;
                 const validationMessage = inputReference.current?.validationMessage ?? ''
 
-                // check custom sync validators
+                // Pass element's validity results to sync validators for
+                // additional checks. Optionally to override WebAPI validity and
+                // change validation message.
                 const syncReason = head(compact(synchronousValidators?.map(validator => validator(value, valid, validationMessage))))
                 if (syncReason) {
                     inputReference.current?.setCustomValidity(syncReason)
