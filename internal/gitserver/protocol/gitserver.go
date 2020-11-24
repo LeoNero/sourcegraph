@@ -6,6 +6,9 @@ import (
 	"github.com/sourcegraph/sourcegraph/internal/api"
 )
 
+// TODO we don't want to comment out the bottom fields, but we did for now to
+// let the compiler show us what needs updating.
+
 // ExecRequest is a request to execute a command inside a git repository.
 //
 // Note that this request is deserialized by both gitserver and the frontend's
@@ -17,7 +20,7 @@ type ExecRequest struct {
 	// URL is the repository's Git remote URL. If the gitserver already has cloned the repository,
 	// this field is optional (it will use the last-used Git remote URL). If the repository is not
 	// cloned on the gitserver, the request will fail.
-	URL string `json:"url,omitempty"`
+	//URL string `json:"url,omitempty"`
 
 	EnsureRevision string      `json:"ensureRevision"`
 	Args           []string    `json:"args"`
@@ -45,8 +48,8 @@ type HTTPSConfig struct {
 
 // RepoUpdateRequest is a request to update the contents of a given repo, or clone it if it doesn't exist.
 type RepoUpdateRequest struct {
-	Repo  api.RepoName  `json:"repo"`  // identifying URL for repo
-	URL   string        `json:"url"`   // repo's remote URL
+	Repo api.RepoName `json:"repo"` // identifying URL for repo
+	//URL   string        `json:"url"`   // repo's remote URL
 	Since time.Duration `json:"since"` // debounce interval for queries, used only with request-repo-update
 }
 

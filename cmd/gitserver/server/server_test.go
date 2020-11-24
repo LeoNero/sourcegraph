@@ -357,6 +357,12 @@ func runCmd(t *testing.T, dir string, cmd string, arg ...string) string {
 	return string(b)
 }
 
+func staticGetRemoteURL(remote string) func(context.Context, api.RepoName) (string, error) {
+	return func(context.Context, api.RepoName) (string, error) {
+		return remote, nil
+	}
+}
+
 func TestCloneRepo(t *testing.T) {
 	remote := tmpDir(t)
 
@@ -379,12 +385,13 @@ func TestCloneRepo(t *testing.T) {
 
 	s := &Server{
 		ReposDir:         reposDir,
+		GetRemoteURL:     staticGetRemoteURL(remote),
 		ctx:              context.Background(),
 		locker:           &RepositoryLocker{},
 		cloneLimiter:     mutablelimiter.New(1),
 		cloneableLimiter: mutablelimiter.New(1),
 	}
-	_, err := s.cloneRepo(context.Background(), "example.com/foo/bar", remote, nil)
+	_, err := s.cloneRepo(context.Background(), "example.com/foo/bar", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -408,7 +415,7 @@ func TestCloneRepo(t *testing.T) {
 	}
 
 	// Test blocking with a failure (already exists since we didn't specify overwrite)
-	_, err = s.cloneRepo(context.Background(), "example.com/foo/bar", remote, &cloneOptions{Block: true})
+	_, err = s.cloneRepo(context.Background(), "example.com/foo/bar", &cloneOptions{Block: true})
 	if !os.IsExist(errors.Cause(err)) {
 		t.Fatalf("expected clone repo to fail with already exists: %s", err)
 	}
@@ -416,7 +423,7 @@ func TestCloneRepo(t *testing.T) {
 	// Test blocking with overwrite. First add random file to GIT_DIR. If the
 	// file is missing after cloning we know the directory was replaced
 	mkFiles(t, string(dst), "HELLO")
-	_, err = s.cloneRepo(context.Background(), "example.com/foo/bar", remote, &cloneOptions{Block: true, Overwrite: true})
+	_, err = s.cloneRepo(context.Background(), "example.com/foo/bar", &cloneOptions{Block: true, Overwrite: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -498,12 +505,13 @@ func TestCloneRepo_EnsureValidity(t *testing.T) {
 
 		server := &Server{
 			ReposDir:         reposDir,
+			GetRemoteURL:     staticGetRemoteURL(remote),
 			ctx:              ctx,
 			locker:           &RepositoryLocker{},
 			cloneLimiter:     mutablelimiter.New(1),
 			cloneableLimiter: mutablelimiter.New(1),
 		}
-		if _, err := server.cloneRepo(ctx, "example.com/foo/bar", remote, nil); err == nil {
+		if _, err := server.cloneRepo(ctx, "example.com/foo/bar", nil); err == nil {
 			t.Fatal("expected an error, got none")
 		}
 	})
@@ -522,12 +530,13 @@ func TestCloneRepo_EnsureValidity(t *testing.T) {
 
 		server := &Server{
 			ReposDir:         reposDir,
+			GetRemoteURL:     staticGetRemoteURL(remote),
 			ctx:              ctx,
 			locker:           &RepositoryLocker{},
 			cloneLimiter:     mutablelimiter.New(1),
 			cloneableLimiter: mutablelimiter.New(1),
 		}
-		if _, err := server.cloneRepo(ctx, "example.com/foo/bar", remote, nil); err == nil {
+		if _, err := server.cloneRepo(ctx, "example.com/foo/bar", nil); err == nil {
 			t.Fatal("expected an error, got none")
 		}
 	})
@@ -548,6 +557,7 @@ func TestCloneRepo_EnsureValidity(t *testing.T) {
 
 		s := &Server{
 			ReposDir:         reposDir,
+			GetRemoteURL:     staticGetRemoteURL(remote),
 			ctx:              ctx,
 			locker:           &RepositoryLocker{},
 			cloneLimiter:     mutablelimiter.New(1),
@@ -556,7 +566,7 @@ func TestCloneRepo_EnsureValidity(t *testing.T) {
 		testRepoCorrupter = func(_ context.Context, tmpDir GitDir) {
 			cmd("sh", "-c", fmt.Sprintf("rm %s/HEAD", tmpDir))
 		}
-		if _, err := s.cloneRepo(ctx, "example.com/foo/bar", remote, nil); err != nil {
+		if _, err := s.cloneRepo(ctx, "example.com/foo/bar", nil); err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
 
@@ -594,6 +604,7 @@ func TestCloneRepo_EnsureValidity(t *testing.T) {
 
 		s := &Server{
 			ReposDir:         reposDir,
+			GetRemoteURL:     staticGetRemoteURL(remote),
 			ctx:              ctx,
 			locker:           &RepositoryLocker{},
 			cloneLimiter:     mutablelimiter.New(1),
@@ -602,7 +613,7 @@ func TestCloneRepo_EnsureValidity(t *testing.T) {
 		testRepoCorrupter = func(_ context.Context, tmpDir GitDir) {
 			cmd("sh", "-c", fmt.Sprintf(": > %s/HEAD", tmpDir))
 		}
-		if _, err := s.cloneRepo(ctx, "example.com/foo/bar", remote, nil); err != nil {
+		if _, err := s.cloneRepo(ctx, "example.com/foo/bar", nil); err != nil {
 			t.Fatalf("expected no error, got %v", err)
 		}
 

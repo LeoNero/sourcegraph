@@ -21,6 +21,7 @@ func (s *Server) repoInfo(ctx context.Context, repo api.RepoName) (*protocol.Rep
 		Cloned: repoCloned(dir),
 	}
 	if resp.Cloned {
+		// TODO
 		remoteURL, err := repoRemoteURL(ctx, dir)
 		if err != nil {
 			return nil, err
